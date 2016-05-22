@@ -126,6 +126,42 @@ inline bool isButtonPressed(uint8_t pin)
   return pressed;
 }
 
+// Count the number of 1-bits in the given long integer.
+//
+inline int countBits(unsigned long i)
+{
+  i = ((i & 0xAAAAAAAAL) >>  1) + (i & 0x55555555L);
+  i = ((i & 0xCCCCCCCCL) >>  2) + (i & 0x33333333L);
+  i = ((i & 0xF0F0F0F0L) >>  4) + (i & 0x0F0F0F0FL);
+  i = ((i & 0xFF00FF00L) >>  8) + (i & 0x00FF00FFL);
+  i = ((i & 0xFFFF0000L) >> 16) + (i & 0x0000FFFFL);
+  return (int)i;
+}
+
+// Determine if the given long integer is a power of two.
+// (Alternative:  countBits(i) == 1.)
+//
+inline bool isPowerOfTwo(long i)
+{
+  return i && !(i & (i-1));
+}
+
+// Reverse the bits of a long integer.
+//
+inline unsigned long reverseBits(unsigned long i)
+{
+  unsigned long r = i;
+  int s = sizeof(i)*8 - 1;
+  for (i >>= 1; i; i >>= 1)
+  {   
+    r <<= 1;
+	r |= i & 1;
+	s--;
+  }
+  r <<= s;
+  return r;
+}
+
 //-------------------------------------------------------------------------------------
 
 #endif // __GENERIC_H__
