@@ -13,54 +13,59 @@
 #ifndef __GENERIC_H__
 #define __GENERIC_H__
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 // The sizeof operator gives the byte size of the whole array.
 // This macro gives the number of elements in an array.
 //
 #define countof(array)  ( sizeof(array) / sizeof(*(array)) )
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 // Entropy is a measure of disorder or chaos.
 //
-// In cryptography or random numbers, you want to mix in any available unpredictable
-// numbers so that the calculations will be highly unpredictable.
+// In cryptography or random numbers, you want to mix in any available
+// unpredictable numbers so that the calculations will be highly
+// unpredictable.
 //
-// An Arduino has very poor support for strong entropy, and it would be time-consuming
-// to gather it anyway.  This function collects what is readily available with minimal
-// delay:  all of the device ports.
+// An Arduino has very poor support for strong entropy, and it would be
+// time-consuming to gather it anyway.  This function collects what is
+// readily available with minimal delay:  all of the device ports.
 //
-// Call this function when you need to seed a PRNG but not whenever you need a random
-// number from the PRNG.  For example, shuffle the deck once (to seed) but draw many
-// cards from the deck before shuffling again.
+// Call this function when you need to seed a PRNG but not whenever you
+// need a random number from the PRNG.  For example, shuffle the deck once
+// (to seed) but draw many cards from the deck before shuffling again.
 //
-// Enhancements to get stronger entropy would be to attach a sensor that reads from a
-// real-world chaotic input (humidity, noise, vibrations, camera pixel data, etc.).
-// This routine would then naturally combine that data with other cheap entropy data.
-// Additionally, store some seed state into EEPROM:  read a previously recorded value
-// from EEPROM, combine it with new entropy, seed the PRNG from this, and store a new
-// value back into EEPROM for the next power-up.  Don't write EEPROM excessively as it
-// will wear out over time.
+// Enhancements to get stronger entropy would be to attach a sensor that
+// reads from a real-world chaotic input (humidity, noise, vibrations,
+// camera pixel data, etc.).  This routine would then naturally combine
+// that data with other cheap entropy data.  Some Atmel controllers have
+// an internal temperature sensor which could have a little bit of entropy
+// as the device warms from a cold startup.  Additionally, store some seed
+// state into EEPROM:  read a previously recorded value from EEPROM,
+// combine it with new entropy, seed the PRNG from this, and store a new
+// value back into EEPROM for the next power-up.  Don't write EEPROM
+// excessively as it will wear out over time.
 //
 inline unsigned long getCheapEntropy()
 {
   static unsigned long entropy = 0xDEADBEEF;
   static unsigned char shift = 0x0F;
 
-  // The current low-order bits of Arduino runtime in micros() is great... if this
-  // function is called after a human-based interaction.  If only called during the
-  // Arduino setup() function or called on a very regular basis, it's going to be
-  // horribly predictable.
+  // The current low-order bits of Arduino runtime in micros() is great...
+  // if this function is called after a human-based interaction.  If only
+  // called during the Arduino setup() function or called on a very
+  // regular basis, it's going to be horribly predictable.
   //
   entropy ^= micros() << shift;
 
-  // The analog input pins will always have a little bit of repeatability error in
-  // them.  This is almost zero if hardwired to ground or VCC, or configured as an
-  // output pin.  The repeatability jitter is pretty weak if attached to a real input
-  // device.  If a pin is left unconnected there is a little more room for
-  // unpredictable values coming in.  Note that small Arduino Pro Mini style boards
-  // often have no connection points (or inconvenient ones) attached to the analog
+  // The analog input pins will always have a little bit of repeatability
+  // error in them.  This is almost zero if hardwired to ground or VCC,
+  // or configured as an output pin.  The repeatability jitter is pretty
+  // weak if attached to a real input device.  If a pin is left
+  // unconnected there is a little more room for unpredictable values
+  // coming in.  Note that small Arduino Pro Mini style boards often have
+  // no connection points (or inconvenient ones) attached to the analog
   // pins A4 and A5.
   //
   entropy ^= analogRead(0) << shift;
@@ -70,26 +75,30 @@ inline unsigned long getCheapEntropy()
   entropy ^= analogRead(4) << (shift+12);
   entropy ^= analogRead(5) << (shift+15);
 
-  // The digital input pins can be read 8 at a time.  These are even less likely to
-  // be useful as entropy sources unless the user is actively pushing buttons or
-  // there is some kind of data transmission going on across the SDI or serial pins
-  // at the time.
+  // The digital input pins can be read 8 at a time.  These are even less
+  // likely to be useful as entropy sources unless the user is actively
+  // pushing buttons or there is some kind of data transmission going on
+  // across the SDI or serial pins at the time.
   //
   entropy ^= PORTB << shift;
   entropy ^= PORTC << (shift+8);
   entropy ^= PORTD << (shift+16);
 
-  // On successive calls to this routine, we alter how we mix our inputs into the
-  // current entropy pool.  This helps ensure that calling us multiple times does
-  // not defeat the entropy gained.  However, it's still not a good idea to call
-  // this routine constantly, such as in every main loop().
+  // On successive calls to this routine, we alter how we mix our inputs
+  // into the current entropy pool.  This helps ensure that calling us
+  // multiple times does not defeat the entropy gained.  However, it's
+  // still not a good idea to call this routine constantly, such as in
+  // every main loop().
   //
   shift = entropy & 0x0F;
 
   return entropy;
 }
 
-// Retrieve a value INPUT, INPUT_PULLUP, or OUTPUT, from the current pin setting.
+//----------------------------------------------------------------------------
+
+// Retrieve a value INPUT, INPUT_PULLUP, or OUTPUT, from the current
+// pin setting.
 //
 inline int getPinMode(uint8_t pin)
 {
@@ -113,7 +122,8 @@ inline int getPinMode(uint8_t pin)
   return OUTPUT;
 }
 
-// Turn the INPUT or INPUT_PULLUP digital input into a useful 0=unpressed/1=pressed return value.
+// Turn the INPUT or INPUT_PULLUP digital input into a useful logical
+// false=unpressed / true=pressed return value.
 //
 inline bool isButtonPressed(uint8_t pin)
 {
@@ -125,6 +135,8 @@ inline bool isButtonPressed(uint8_t pin)
     pressed = !pressed;
   return pressed;
 }
+
+//----------------------------------------------------------------------------
 
 // Count the number of 1-bits in the given long integer.
 //
@@ -162,7 +174,7 @@ inline unsigned long reverseBits(unsigned long i)
   return r;
 }
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 #endif // __GENERIC_H__
 

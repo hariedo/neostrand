@@ -4,6 +4,9 @@
 // Vocaloid NeoPixel Strand Controller is licensed under a
 // Creative Commons Attribution-ShareAlike 4.0 International License.
 // 
+// Vocaloid(tm) is a trademark of Yamaha Corporation. This project has no
+// proprietary content from, nor infers any relationship with Yamaha.
+//
 // You should have received a copy of the license along with this
 // work. If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
 //
@@ -17,43 +20,54 @@
 // Battery ==== Arduino =========== |A|A|A|A|A|A|A| == |C|C|C|C|C|C|C|...|C|
 //              ^B ^B ^Buttons
 //
-// A battery is attached to a small box with an Arduino and three momentary buttons.
-// A longer cord stretches from the small box to a hairpiece that has one or two
-// NeoPixel(tm) WS2812-style shift register RGB LED devices in series.  The wearer can
-// select the modes and special effects by pressing combinations of buttons on the
-// control box.  The first N pixels are dedicated as an accent/accessory color, while
-// the remaining pixels are intended to display the main character signature color.
-// These pixels are typically arranged on the wearer's head, such as from a hairband.
-// There are convenient rings of NeoPixels that work well as the hair accessory.
-// If no hair accessory component is attached, then set the ACCESSORY_LENGTH to 0 and
-// no pixels for accent colors will be reserved.  Set the CHARACTER_LENGTH to the
-// length of the main NeoPixel device; the macro STRAND_LENGTH is the sum total of
-// these.
-//
-// To celebrate the main Vocaloid star, Hatsune Miku, the wearer should have two
-// complete (independent) hardware units, with a 12- or 16-LED ring for the accessory
-// and a 1-meter high density 144-pixel strand for each of two long ponytails
-// (twintails).
-//
-// A large-capacity USB charger that can supply over 2A per port is sufficient if the
-// LEDs are not driven at full power.  A dimming potentiometer option is included to
-// adjust the brightness.  The pixels will jitter and show inaccurate colors if there
-// is not enough current available for the brightness setting.  If not using a USB
-// charging device and your supply is more than 5V, you MUST INCLUDE a suitable 5V DC
-// REGULATOR or you will damage the NeoPixels.  An Arduino's DC regulator is typically
-// not able to drive multiple amps of current.
-//
-
-//-------------------------------------------------------------------------------------
-
-//
-// Define all our program constants.  These are chosen based on the wiring and timing,
-// and never change without recompiling and re-loading the Arduino.
+// A battery is attached to a small box with an Arduino and three momentary
+// buttons.  A longer cord stretches from the small box to a hairpiece that
+// has one or two NeoPixel(tm) WS2812-style shift register RGB LED devices
+// in series.  The wearer can select the modes and special effects by
+// pressing combinations of buttons on the control box.  The first N pixels
+// are dedicated as an accent/accessory color, while the remaining pixels are
+// intended to display the main character signature color.  These pixels are
+// typically arranged on the wearer's head, such as from a hairband.  There
+// are convenient rings of NeoPixels that work well as the hair accessory.
+// If no hair accessory component is attached, then set the ACCESSORY_LENGTH
+// to 0 and no pixels for accent colors will be reserved.  Set the
+// CHARACTER_LENGTH to the length of the main NeoPixel device; the macro
+// STRAND_LENGTH is the sum total of these.
+// 
+// To celebrate the main Vocaloid star, Hatsune Miku, the wearer should have
+// two complete (independent) hardware units, with a 12- or 16-LED ring for
+// the accessory and a 1-meter high density 144-pixel strand for each of two
+// long ponytails (twintails).
+// 
+// A large-capacity USB charger that can supply over 2A per port is
+// sufficient if the LEDs are not driven at full power.  A dimming
+// potentiometer option is included to adjust the brightness.  The pixels
+// will jitter and show inaccurate colors if there is not enough current
+// available for the brightness setting.  If not using a USB charging device
+// and your supply is more than 5V, you MUST INCLUDE a suitable 5V DC
+// REGULATOR or you will damage the NeoPixels.  An Arduino's DC regulator is
+// typically not able to drive multiple amps of current.  Best practice is
+// to have an electrolytic capacitor damp the changes in current demand,
+// wired in parallel across the power supply to the NeoPixel strip.
+// Suggested value is 1000uF rated for 10V or higher.
 //
 
-// We connect a NeoPixel strand to one data pin on the Arduino.  We have to declare
-// how many LEDs (total) are in the overall NeoPixel strand.  We can reserve a certain
-// portion of the top of the strand for an accessory color, or use 0 for no accessory.
+//----------------------------------------------------------------------------
+
+//
+// Define all our program constants.  These are chosen based on the wiring
+// and timing, and never change without recompiling and re-loading the
+// Arduino code.
+//
+
+// We connect a NeoPixel strand to one data pin on the Arduino.  We have to
+// declare how many LEDs (total) are in the overall NeoPixel strand.  We
+// can reserve a certain portion of the top of the strand for an accessory
+// color, or use 0 for no accessory.
+//
+// Best practice is to have a moderate resistor in series between the
+// STRAND_PIN and the NeoPixel strand input.  Suggested resistor value is
+// 470ohms.
 //
 #include "NeoStrand.h"
 #define STRAND_PIN 11
@@ -62,26 +76,29 @@
 #define STRAND_LENGTH (ACCESSORY_LENGTH+CHARACTER_LENGTH)
 NeoStrand strand = NeoStrand(STRAND_LENGTH, STRAND_PIN);
 
-// We connect three momentary buttons (with helpfully colored caps) to three data
-// pins on the Arduino.  The combination of these buttons will be monitored.  So
-// if the user pushes one button, such as the LUKA/pink button, then LUKA's mode
-// will be selected; if the user pushes a combo like LUKA+TWIN, then a different mode
-// is selected instead.  In this way, we have a maximum of 8 combos (all off, three
-// ways to push one button, three ways to push two buttons together, and one combo
-// if pushing all three buttons together. 
+// We connect three normally-open momentary buttons (with helpfully
+// colored caps) to three data pins on the Arduino.  The opposite pin of
+// each button is grounded.  The combination of these buttons will be
+// monitored.  So if the user pushes one button, such as the LUKA/pink
+// button, then LUKA's mode will be selected; if the user pushes a combo
+// like LUKA+TWIN, then a different mode is selected instead.  In this way,
+// we have a maximum of 8 combos (all off, three ways to push one button,
+// three ways to push two buttons together, and one combo if pushing all
+// three buttons together. 
 //
 #define LUKA_BUTTON 9
 #define TWIN_BUTTON 8
 #define MIKU_BUTTON 7
 
-// If a special debugging button is wired up, we can react to it.  This can be
-// useful on the breadboard stage, but left out of the final circuit buildup.
+// If a special debugging button is wired up, we can react to it.  This can
+// be useful on the breadboard stage, but left out of the final circuit
+// buildup.
 //
 #define DEBUG_BUTTON 4
 
-// These are timing constants that we use to control the speed of various parts of
-// the sketch.  Each loop cycle is roughly 1~3ms, depending on the length of the
-// strand.
+// These are timing constants that we use to control the speed of various
+// parts of the sketch.  Each loop cycle is roughly 1~3ms, depending on the
+// length of the strand.
 //
 #define SCROLL_CYCLES 2
 #define RAINBOW_CYCLES 2
@@ -89,19 +106,20 @@ NeoStrand strand = NeoStrand(STRAND_LENGTH, STRAND_PIN);
 #define HISTORY_CYCLES 250
 #define HOLD_MODE_CYCLES 800
 
-// We want to keep some historical data on recent button pushes, to detect special
-// patterns of presses like hold, double-tap, etc.  In this way, we can greatly
-// increase the power of the limited user interface.
+// We want to keep some historical data on recent button pushes, to detect
+// special patterns of presses like hold, double-tap, etc.  In this way,
+// we can greatly increase the power of the limited user interface.
 //
 #define HISTORY_LENGTH 6
 unsigned long history_millis = 0;
 unsigned long history_time[HISTORY_LENGTH];
 int history_vector[HISTORY_LENGTH];
 
-// This list of names corresponds to all of the major Vocaloid modes that we want
-// to support.  Since we have three buttons, we have a maximum of eight MAJOR modes
-// that are easy to select.  The mode numbers are also used as the "input vector,"
-// representing the user's button combination pressed at any given instant.
+// This list of names corresponds to all of the major Vocaloid modes that
+// we want to support.  Since we have three buttons, we have a maximum of
+// eight MAJOR modes that are easy to select.  The mode numbers are also
+// used as the "input vector," representing the user's button combination
+// pressed at any given instant.
 //
 enum
 {
@@ -118,14 +136,15 @@ enum
 // The current major Vocaloid character mode.
 int mode = NOBODY;
 
-// For each vocaloid mode we support, we have a signature color based on a
-// Vocaloid(tm) character's hair or costume color.  These colors can be any RGB
-// color, 0~255 Red + 0~255 Green + 0~255 Blue.  Brighter is better.
+// For each vocaloid mode we support, we have a signature color based on
+// a Vocaloid character's hair or costume color.  These colors can be
+// any RGB color, 0~255 Red + 0~255 Green + 0~255 Blue.  Brighter is
+// better; we can always dim the colors separately.
 //
 uint32_t VocaloidColors[] =
 {
   strand.Color(0, 0, 0),       // NOBODY
-  strand.Color(40, 255, 130),  // MIKU AQUAMARINE
+  strand.Color(40, 255, 130),  // MIKU AQUAMARINE HAIR
   strand.Color(200, 200, 30),  // TWINS RIN/LEN BLONDE
   strand.Color(10, 10, 255),   // KAITO BLUE
   strand.Color(240, 70, 70),   // LUKA PINK
@@ -149,31 +168,33 @@ uint32_t AccessoryColors[] =
   strand.Color(200, 0, 200),   // RAINBOW [updated all the time]
 };
 
-// This list of names corresponds to all of the minor effect modes that we want to
-// support.  We can have as many as we want here, but we have to have some kind of
-// way of tapping, pushing, double-tapping, or holding the buttons to achieve the
-// selection, so keep it simple.
+// This list of names corresponds to all of the minor effect modes that we
+// want to support.  We can have as many as we want here, but we have to
+// have some kind of way of tapping, pushing, double-tapping, or holding
+// the buttons to achieve the selection, so keep it simple.
 //
 enum
 {
   NONE=0,     // no change
   SOLID,      // default effect for a single tap
-  PULSING,    // tap the buttons for at least 3 beats, it will try to match rhythm
+  PULSING,    // tap for at least 3 beats, it will try to match rhythm
   SPARKLING,  // double-tap the buttons quickly and stop
   SHUTDOWN,   // hold the buttons for 3 seconds
 };
 unsigned long pulsingPeriod = 1000;
 
 // NeoPixel brightness ranges from 0~255.
-// Full brightness is energy-inefficient and blindingly bright.  We also want to
-// reserve some extra brightness for special effects. So here, we define the
-// typical brightness level.
+// Full brightness is energy-inefficient and blindingly bright.  We also
+// want to reserve some extra brightness for special effects. So here, we
+// define the typical brightness level. Wiring a trim potentiometer
+// between the DIMMER_PIN and VCC will let you further adjust the overall
+// effect.  Suggested value is 10kohm.
 //
 #define RESTING_BRIGHTNESS 130
 #define DIMMER_PIN (A0)
 int dimmer = 255;
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 // The "setup" function is run one time, shortly after power is provided.
 // In this function, we can perform whatever things we think are necessary
@@ -184,9 +205,10 @@ void setup()
   Serial.begin(115200);
 
   // Buttons are input devices.
-  // For these buttons, we will use the Arduino internal pullup-resistor mechanism,
-  // which means that they will read as HIGH when not pushed, and LOW when pushed.
-  // Wire each button to their respective input pin and to the common circuit ground.
+  // For these buttons, we will use the Arduino internal pullup-resistor
+  // mechanism, which means that they will read as HIGH when not pushed,
+  // and LOW when pushed.  Wire each button to their respective input pin
+  // and to the common circuit ground.
   //
   pinMode(LUKA_BUTTON, INPUT_PULLUP);
   pinMode(TWIN_BUTTON, INPUT_PULLUP);
@@ -195,8 +217,8 @@ void setup()
   //pinMode(DIMMER_PIN, INPUT);
   
   // LEDs are output devices.
-  // Set up the NeoStrand device which will initialize the pin mode and all of the
-  // pixels on the strand are cleared to black/off.
+  // Set up the NeoStrand device which will initialize the pin mode and
+  // all of the pixels on the strand are cleared to black/off.
   //
   strand.begin();
   strand.show();
@@ -207,7 +229,7 @@ void setup()
   mode = performBoot(mode);
 }
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 int performWait(int target)
 {
@@ -340,7 +362,7 @@ int performBoot(int target)
   return target;
 }
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 // The "loop" function is run repeatedly, until power is removed or the
 // device is reset.  In this function, we can perform whatever things we
@@ -356,14 +378,19 @@ void loop()
   // The EVERYONE mode's special rainbow color is updated all the time.
   updateRainbow();
 
-  // Check all our inputs and get one number representing all the buttons together.
+  // Update our overall brightness factor from a trim knob.
   dimmer = updateDimmer();
 
+  // Check all our inputs and get one number representing all the buttons
+  // together.  The "confirmed input" function includes some special logic
+  // to ensure the user's intended input, since two or three buttons are
+  // hard to press or release at exactly the same instant.
+  //
   int currentVector = getConfirmedInputVector();
 
-  // Any positive change in confirmed vector instantly changes the overall "mode"
-  // of our system to a new Vocaloid character, and feeds the new mode's color into
-  // the top of the strand.
+  // Any positive change in confirmed vector instantly changes the overall
+  // "mode" of our system to a new Vocaloid character, and feeds the new
+  // mode's color into the top of the strand.
   //
   static int effect = SOLID;
   static int lastMode = EVERYONE;
@@ -374,8 +401,8 @@ void loop()
       effect = SOLID;
   }
 
-  // Monitor the history of this input vector.  Certain timing patterns can be
-  // detected to select a sub-mode special effect.
+  // Monitor the history of this input vector.  Certain timing patterns can
+  // be detected to select a sub-mode special effect.
   //
   int command = detectEffectCommand(currentVector);
   if (command != NONE)
@@ -403,16 +430,16 @@ void loop()
   lastMode = mode;
 }
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
-// Sometimes it can be tough to figure out why a feature is not working, since you
-// can't just look inside a variable while the chip is running the program.  So this
-// function offers a way to pause and report any useful information back to the
-// host computer.
+// Sometimes it can be tough to figure out why a feature is not working,
+// since you can't just look inside a variable while the chip is running
+// the program.  So this function offers a way to pause and report any
+// useful information back to the host computer.
 //
-// If the button is pushed, print anything you want, then wait for the button to be
-// released.  You don't even need an actual button.  Just short the DEBUG_BUTTON pin
-// to any ground pin.
+// If the button is pushed, print anything you want, then wait for the
+// button to be released.  You don't even need an actual button.  Just
+// short the DEBUG_BUTTON pin to any ground pin.
 //
 void updateDebug()
 {
@@ -439,19 +466,22 @@ void updateDebug()
     Serial.print(dimmer);
     Serial.print(";\n");
 
-    // Wait for the debug button to be released, so as not to spam the terminal.
+    // Wait for the debug button to be released, so as not to spam the
+    // terminal with too much data.
+    //
     delay(100);
     while (isButtonPressed(DEBUG_BUTTON))
       ;
   }
 }
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
-// Read the potentiometer option and scale the results to our NeoPixel dimmer range.
-// We don't allow the potentiometer to dim all the way down to zero, because it makes
-// it pretty confusing to debug the circuit with no lights.  We also don't want it to
-// go too dark because the colors get a bit inaccurate if scaled too low.
+// Read the potentiometer option and scale the results to our NeoPixel
+// dimmer range.  We don't allow the potentiometer to dim all the way down
+// to zero, because it makes it pretty confusing to debug the circuit with
+// no lights.  We also don't want it to go too dark because the colors get
+// a bit inaccurate if scaled too low.
 //
 int updateDimmer()
 {
@@ -469,8 +499,8 @@ void clearHistory()
   history_millis = millis();
 }
 
-// Check out the history arrays to see if the user has executed a triple-tap of the
-// same button vector combo.  If so, set up the PULSING effect.
+// Check out the history arrays to see if the user has executed a triple-
+// tap of the same button vector combo.  If so, set up the PULSING effect.
 //
 int detectTripleTap()
 {
@@ -480,12 +510,13 @@ int detectTripleTap()
 
   // The vector history arrays need to match this pattern:
   //
-  //                   < most recent                          least recent >
+  //                   < most recent                 least recent >
   // history_vector:   [ NOBODY, x, NOBODY,     x, NOBODY, x, ... ]
   // history_time:     [      ?, y,      w,     y,      w, ?, ... ]
   //
   // The 'y+w' times have to be approximately equal (within HISTORY_CYCLES).
-  // The pulse rate becomes defined as the average of the last two 'y+w' times.
+  // The pulse rate becomes defined as the average of the last two 'y+w'
+  // timespans.
   //
   if (history_vector[0] == NOBODY &&
       history_vector[2] == NOBODY &&
@@ -512,8 +543,9 @@ int detectTripleTap()
   return NONE;
 }
 
-// Check out the history arrays to see if the user has executed a double-tap of the
-// same button vector combo.  If so, set up the SPARKLING effect.
+// Check out the history arrays to see if the user has executed a double-
+// tap of the same button vector combo.  If so, set up the SPARKLING
+// effect.
 //
 int detectDoubleTap()
 {
@@ -544,8 +576,9 @@ int detectDoubleTap()
   return NONE;
 }
 
-// Check out the history arrays to see if the user has executed a long-tap of the
-// same button vector combo.  If so, set up the SHUTDOWN effect.
+// Check out the history arrays to see if the user has executed a long-
+// tap of the same button vector combo.  If so, set up the SHUTDOWN
+// effect.
 //
 int detectLongTap()
 {
@@ -568,8 +601,9 @@ int detectLongTap()
   return NONE;
 }
 
-// This routine records the recent history of user actions, and then checks if
-// any of the special effect commands can be detected in the history data.
+// This routine records the recent history of user actions, and then
+// checks if any of the special effect commands can be detected in the
+// history data.
 //
 int detectEffectCommand(int vector)
 {
@@ -590,7 +624,9 @@ int detectEffectCommand(int vector)
     history_millis = now;
   }
 
-  // The latest entry in the history is always counting up from the last change.
+  // The latest entry in the history is always counting upward from the
+  // last change.  Thus, when the next change is pressed onto the history,
+  // it represents the length of time there was no change.
   //
   int since = (now - history_millis);
   history_time[0] = since;
@@ -606,12 +642,13 @@ int detectEffectCommand(int vector)
   return effect;
 }
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
-// Make any strand lighting updates desired.  This is based on a given major character
-// mode and also a special effect.  In our case, we rely heavily on the NeoStrand's
-// "scrollForward" function, to allow new modes to appear at the top of the strand and
-// wash down the strand like a waterfall.
+// Make any strand lighting updates desired.  This is based on a given
+// major character mode and also a special effect.  In our case, we rely
+// heavily on the NeoStrand's "scrollForward" function, to allow new
+// modes to appear at the top of the strand and smoothly wash down the
+// strand like a waterfall.
 // 
 void updateStrand(int mode, int effect)
 {
@@ -717,7 +754,7 @@ uint32_t applySolidEffect(uint32_t color, unsigned long now)
 
 uint32_t applyPulsingEffect(uint32_t color, unsigned long now)
 {
-  // Right on the pulsing beat frequency is bright; fades to resting brightness.
+  // Right on the pulsing beat frequency is bright; fades to resting level.
   unsigned long since = now - history_millis + history_time[1];
   while (since > pulsingPeriod)
     since -= pulsingPeriod;
@@ -741,9 +778,9 @@ uint32_t applyShutdownEffect(uint32_t color, unsigned long now)
   // Nothing to do here.
 }
 
-// This function keeps track of a cycling hue that is used to generate a prismatic
-// rainbow effect.  It uses the NeoStrand "wheel" function to calculate a rainbow
-// color.
+// This function keeps track of a cycling hue that is used to generate a
+// prismatic rainbow effect.  It uses the NeoStrand "wheel" function to
+// calculate a rainbow color.
 //
 void updateRainbow()
 {
@@ -770,10 +807,10 @@ void updateRainbow()
 //     buttons pressed to two buttons pressed even if they don't get pressed
 //     at the exact same instant
 //
-// Lastly, we flicker the onboard LED on the Arduino, just to show that there
-// is some activity on the buttons.  This is very useful during the breadboard
-// stage when you're not sure if the circuit is wrong or the software has
-// crashed.
+// Lastly, we flicker the onboard LED on the Arduino, just to show that
+// there is some activity on the buttons.  This is very useful during the
+// breadboard stage when you're not sure if the circuit is wrong or the
+// software has crashed.
 //
 int getConfirmedInputVector()
 {

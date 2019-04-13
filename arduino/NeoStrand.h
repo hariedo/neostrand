@@ -18,9 +18,12 @@
   #include <avr/power.h>
 #endif
 
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
-// Extends the core Adafruit_NeoPixel class with some additional useful capabilities.
+// Extends the core Adafruit_NeoPixel class with some additional useful
+// capabilities.  Some of these features are also found in the alternate
+// library called FastLED, but this example shows how you can cleanly
+// extend an existing C++ class to support new features.
 //
 class NeoStrand : public Adafruit_NeoPixel
 {
@@ -66,8 +69,8 @@ public:
     return Color(WheelPos * 3, 255 - WheelPos * 3, 0);
   }
 
-  // Instantly or slowly wipes a constant color from the first to the last pixel.
-  // Displays immediately; no strand.show() call is required.
+  // Instantly or slowly wipes a constant color from the first to the last
+  // pixel.  Displays immediately; no strand.show() call is required.
   //
   void wipeWithColor(uint32_t color, uint16_t wait = 0)
   {
@@ -85,9 +88,10 @@ public:
   }
 
   // Instantly or slowly wipes a rainbow from the first to the last pixel.
-  // If given an initial hue value (0~255), the whole rainbow is shifted to align.
-  // The rainbow is scaled so that the whole strand ranges through one hue cycle.
-  // Displays immediately; no strand.show() call is required.
+  // If given an initial hue value (0~255), the whole rainbow is shifted
+  // to align.  The rainbow is scaled so that the whole strand ranges
+  // through one hue cycle.  Displays immediately; no strand.show() call
+  // is required.
   //
   void wipeWithRainbow(uint8_t shift = 0, uint16_t wait = 0)
   {
@@ -105,10 +109,11 @@ public:
       show();
   }
 
-  // Shifts all pixel color contents forward (away from pixel 0) by a given number of
-  // pixels. If given a color, the nearest pixel(s) are loaded with that color; black
-  // is the default. If not given a number of pixels to shift, 1 pixel is the default.
-  // Does not display immediately; follow up with a strand.show() call.
+  // Shifts all pixel color contents forward (away from pixel 0) by a given
+  // number of pixels. If given a color, the nearest pixel(s) are loaded
+  // with that color; black is the default. If not given a number of pixels
+  // to shift, 1 pixel is the default.  Does not display immediately;
+  // follow up with a strand.show() call.
   //
   void scrollForward(uint16_t amount = 1, uint32_t color = 0)
   {
@@ -123,10 +128,11 @@ public:
       setPixelColor(amount, color);
   }
 
-  // Shifts all pixel color contents backward (toward pixel 0) by a given number of
-  // pixels. If given a color, the farthest pixel(s) are loaded with that color; black
-  // is the default. If not given a number of pixels to shift, 1 pixel is the default.
-  // Does not display immediately; follow up with a strand.show() call.
+  // Shifts all pixel color contents backward (toward pixel 0) by a given
+  // number of pixels. If given a color, the farthest pixel(s) are loaded
+  // with that color; black is the default. If not given a number of
+  // pixels to shift, 1 pixel is the default.  Does not display immediately;
+  // follow up with a strand.show() call.
   //
   void scrollBackward(uint16_t amount = 1, uint32_t color = 0)
   {
@@ -149,20 +155,23 @@ protected:
 };
 
 //
-// Comments on the original Adafruit_NeoPixel code, which maybe Adafruit will read
-// and incorporate in future versions.
+// Comments on the original Adafruit_NeoPixel code, which maybe Adafruit
+// will read and incorporate in future versions.
 //
-// 1. The number of times the original code uses (wOffset == rOffset) to figure out
-//    the channel storage scheme is excessive. It's not immediately obvious in
-//    purpose but it's pervasive. Definitely wrap those in an inline member function
-//    isRGB() and isRGBW() to make the code more clear and maintainable.
+// 1. The number of times the original code uses (wOffset == rOffset) to
+//    figure out the channel storage scheme is excessive. Since there is
+//    no function name, it's not immediately obvious to the reader what
+//    the purpose might be, but it's pervasive in the code. Definitely
+//    wrap those in an inline member function isRGB() and isRGBW() as
+//    shown above to make the code more clear and maintainable.
 //
-// 2. A class that does dynamic allocation (operator new or malloc()) should use a
-//    virtual destructor, so that extension classes will get the right behavior
-//    when code uses polymorphic calls.  This change costs one pointer per instance
-//    of the class. Of course, using malloc() on a tiny microcontroller is already a
-//    little bit risky as memory can fragment over multiple construct/destruct cycles
-//    and you end up with a heap crash, but the likelihood that users will change
+// 2. A class that does dynamic allocation (operator new or malloc())
+//    should use a virtual destructor, so that extension classes will get
+//    the right behavior when code uses polymorphic calls.  This change
+//    costs one pointer per instance of the class.  Of course, using
+//    malloc() on a tiny microcontroller is already a little bit risky as
+//    memory can fragment over multiple construct/destruct cycles and you
+//    end up with a heap crash, but the likelihood that users will change
 //    strand length during a run is pretty rare.
 //
 
