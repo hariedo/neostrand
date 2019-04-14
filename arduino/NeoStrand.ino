@@ -1,6 +1,9 @@
 // Vocaloid NeoPixel Strand Controller
 // Copyright (c) by Ed Halley and Jaime Halley
 //
+// On YouTube:  https://youtu.be/9ahXiw0cFx8
+// On GitHub:   https://github.com/hariedo/neostrand
+//
 // Vocaloid NeoPixel Strand Controller is licensed under a
 // Creative Commons Attribution-ShareAlike 4.0 International License.
 // 
