@@ -1,6 +1,8 @@
 # neostrand
 NeoPixel + Arduino + Vocaloid Hairband Strand Project
 
+On YouTube:  https://youtu.be/9ahXiw0cFx8
+
 This is a nice multi-discipline maker project combining:
 
 * some 3D-printed parts for a hairband and a light controller case
